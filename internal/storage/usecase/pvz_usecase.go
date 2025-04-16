@@ -12,8 +12,8 @@ import (
 
 type PVZUsecase struct {
 	pvzStorage       *storage.PVZPostgresStorage
-	receptionStorage *storage.ReceptionPostgresStorage
-	productStorage   *storage.ProductPostgresStorage
+	receptionStorage *storage.ReceptionPostgresStorage //
+	productStorage   *storage.ProductPostgresStorage   //
 }
 
 func NewPVZUsecase(pvzStorage *storage.PVZPostgresStorage, receptionStorage *storage.ReceptionPostgresStorage, productStorage *storage.ProductPostgresStorage) *PVZUsecase {
@@ -21,7 +21,7 @@ func NewPVZUsecase(pvzStorage *storage.PVZPostgresStorage, receptionStorage *sto
 }
 
 func (p *PVZUsecase) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
-	fmt.Println(id, user_id)
+
 	pvz, err := p.pvzStorage.GetPVZById(id)
 	if err != sql.ErrNoRows {
 		return nil, fmt.Errorf("pvz exists")
@@ -38,7 +38,7 @@ func (p *PVZUsecase) CreatePVZ(id, user_id uuid.UUID, city string, date time.Tim
 }
 
 // TODO: плохо реализовал, нужно переделать
-func (p *PVZUsecase) GetListPVZ(user_id uuid.UUID) ([]entity.ListPVZ, error) {
+/* func (p *PVZUsecase) GetListPVZ(user_id uuid.UUID) ([]entity.ListPVZ, error) {
 	var output []entity.ListPVZ
 
 	listPVZ, err := p.pvzStorage.GetListPVZByUserId(user_id)
@@ -60,6 +60,6 @@ func (p *PVZUsecase) GetListPVZ(user_id uuid.UUID) ([]entity.ListPVZ, error) {
 		output = append(output, entity.ListPVZ{Pvz: PVZ, Receptions: listReception})
 	}
 	return output, nil
-}
+} */
 
 //time.Now().UTC().Format(time.RFC3339)

@@ -20,17 +20,23 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	auth := usecase.NewAuthService("secret")
 	userRepo := storage.NewUsersStorage(db)
 	pvzRepo := storage.NewPVZPostgresStorage(db)
 	receptionRepo := storage.NewReceptionPostgresStorage(db)
 	productRepo := storage.NewProductPostgresStorage(db)
+
+	auth := usecase.NewAuthService("secret")
+	receptionUsecase := usecase.NewReceptionUsecase(receptionRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, auth)
 	pvzUsecase := usecase.NewPVZUsecase(pvzRepo, receptionRepo, productRepo)
+	productUsecase := usecase.NewProductUsecase(productRepo, receptionRepo)
+
 	loginHandler := delivery.NewLoginHandler(userUsecase)
 	registerHandler := delivery.NewRegisterHandler(userUsecase)
 	dummyLoginHandler := delivery.NewDummyLoginHandler(userUsecase)
 	postPVZHandler := delivery.NewPVZHandler(pvzUsecase)
+	receptionHandler := delivery.NewReceptionHandler(receptionUsecase)
+	productHandler := delivery.NewProductHandler(productUsecase)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -42,6 +48,8 @@ func main() {
 	protected.Use(middlewares.JWTAuthMiddleware(auth))
 	{
 		protected.POST("/pvz", postPVZHandler.PostPVZ)
+		protected.POST("/receptions", receptionHandler.Reception)
+		protected.POST("/products", productHandler.Reception)
 	}
 
 	srv := &http.Server{

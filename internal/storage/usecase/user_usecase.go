@@ -19,7 +19,7 @@ func NewUserUsecase(userStorage *storage.UsersPostgresStorage, authService *Auth
 
 func (u *UserUsecase) Login(email, password string) (string, error) {
 	user, err := u.userStorage.GetUserByEmail(email)
-	if err != sql.ErrNoRows {
+	if err == sql.ErrNoRows {
 		return "", fmt.Errorf("invalid credentials")
 	}
 
@@ -33,7 +33,7 @@ func (u *UserUsecase) Login(email, password string) (string, error) {
 
 func (u *UserUsecase) Register(email, password, role string) (string, error) {
 	user, err := u.userStorage.GetUserByEmail(email)
-	if err == sql.ErrNoRows {
+	if err != sql.ErrNoRows {
 		return "", fmt.Errorf("user exists")
 	}
 	if err != nil && err != sql.ErrNoRows {

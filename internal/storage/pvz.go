@@ -22,7 +22,7 @@ func (p *PVZPostgresStorage) CreatePVZ(id, user_id uuid.UUID, city string, date 
 	if err != nil {
 		return nil, err
 	}
-	return &entity.PVZ{ID: id, RegistrationDate: date, City: city}, nil
+	return &entity.PVZ{ID: id, RegistrationDate: date, City: city}, nil // проверить дату
 }
 
 func (p *PVZPostgresStorage) GetPVZById(id uuid.UUID) (*entity.PVZ, error) {
@@ -38,7 +38,7 @@ func (p *PVZPostgresStorage) GetPVZById(id uuid.UUID) (*entity.PVZ, error) {
 	return &pvz, nil
 }
 
-func (p *PVZPostgresStorage) GetListPVZByUserId(id uuid.UUID) ([]entity.PVZ, error) {
+/* func (p *PVZPostgresStorage) GetListPVZByUserId(id uuid.UUID) ([]entity.PVZ, error) {
 	query := "SELECT * FROM pvz WHERE user_id = $1"
 	rows, err := p.db.Query(query, id)
 
@@ -52,4 +52,4 @@ func (p *PVZPostgresStorage) GetListPVZByUserId(id uuid.UUID) ([]entity.PVZ, err
 		pvzList = append(pvzList, pvz)
 	}
 	return pvzList, nil
-}
+} */
