@@ -33,3 +33,25 @@ func (p *ProductUsecase) CreateProduct(id uuid.UUID, product_type string) (*enti
 	}
 	return products, nil
 }
+
+func (p *ProductUsecase) DeleteLastProduct(pvz_id uuid.UUID) error {
+	reception_id, status, err := p.receptionStorage.GetLastReceptionStatus(pvz_id)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("failed to check reception status: %w", err)
+	}
+	if status == "close" {
+		return fmt.Errorf("no available receptions")
+	}
+
+	product_id, err := p.productStorage.GetLastProductID(reception_id)
+	if err != nil {
+		return err
+	}
+
+	err = p.productStorage.DeleteProduct(product_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

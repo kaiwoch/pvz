@@ -43,3 +43,24 @@ func (p *ProductPostgresStorage) CreateProduct(id uuid.UUID, product_type string
 	}
 	return &entity.Products{ID: product_id, DateTime: date, Type: product_type, ReceptionId: id}, nil
 }
+
+func (p *ProductPostgresStorage) DeleteProduct(product_id uuid.UUID) error {
+	query := "delete from product where product_id = $1"
+
+	_, err := p.db.Exec(query, product_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProductPostgresStorage) GetLastProductID(reception_id uuid.UUID) (uuid.UUID, error) {
+	var product_id uuid.UUID
+	query := "SELECT product_id FROM product WHERE reception_id = $1 ORDER BY date_time DESC LIMIT 1"
+
+	err := p.db.QueryRow(query, reception_id).Scan(&product_id)
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+	return product_id, nil
+}

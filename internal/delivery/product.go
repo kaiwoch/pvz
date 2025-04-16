@@ -47,3 +47,28 @@ func (h *ProductHandler) Reception(c *gin.Context) {
 
 	c.JSON(http.StatusOK, product)
 }
+
+func (h *ProductHandler) DeleteLastProduct(c *gin.Context) {
+	role, _ := c.Get("role")
+
+	if role.(string) != "employee" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
+		return
+	}
+
+	pvz_id_string := c.Param("pvzId")
+
+	pvz_id, err := uuid.FromString(pvz_id_string)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Wrong query"})
+		return
+	}
+
+	err = h.productUsecase.DeleteLastProduct(pvz_id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, "")
+}

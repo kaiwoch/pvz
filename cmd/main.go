@@ -50,6 +50,7 @@ func main() {
 		protected.POST("/pvz", postPVZHandler.PostPVZ)
 		protected.POST("/receptions", receptionHandler.Reception)
 		protected.POST("/products", productHandler.Reception)
+		protected.POST("/pvz/:pvzId/delete_last_product", productHandler.DeleteLastProduct)
 	}
 
 	srv := &http.Server{
