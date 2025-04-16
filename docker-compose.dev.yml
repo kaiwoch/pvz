@@ -1,0 +1,26 @@
+services:
+  # Postgres database.
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres    
+      POSTGRES_PASSWORD: postgres 
+      POSTGRES_DB: postgres   
+    ports:
+      - 5432:5432          
+  # Postgres database.
+  pgbouncer:
+    image: bitnami/pgbouncer
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_PORT: 5432
+      PGBOUNCER_LISTEN_PORT: 6432
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_AUTH_TYPE: md5 
+    links:
+      - postgres:postgres
+    ports:
+      - 6432:6432 
