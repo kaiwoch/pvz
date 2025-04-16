@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 )
 
 type AuthUsecase interface {

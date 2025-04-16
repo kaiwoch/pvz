@@ -30,6 +30,10 @@ CREATE TABLE product (
     reception_id UUID NOT NULL,
     FOREIGN KEY (reception_id) REFERENCES reception(reception_id)
 );
+
+INSERT INTO users (user_id, email, password_hash, role_name) VALUES 
+    ('00000000-0000-0000-0000-000000000000','dummy_moderator@test.com', '$2a$10$R9Sbv7JPKcjNkcLSTLGhoueS9nP5ieZOkBTWFt0peEMibfRXLIk62', 'moderator'),
+    ('00000000-0000-0000-0000-000000000001','dummy_employee@test.com', '$2a$10$ozMElrcQdyqolglq7KZKNOE3re8HtZXIbzfX2cpdq2Cog9ZhzoGDG', 'employee');
 -- +goose StatementEnd
 
 -- +goose Down

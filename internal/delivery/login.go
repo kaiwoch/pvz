@@ -26,6 +26,11 @@ func (h *LoginHandler) Login(c *gin.Context) {
 		return
 	}
 
+	if input.Email == "" || input.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
 	token, err := h.loginUsecase.Login(input.Email, input.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

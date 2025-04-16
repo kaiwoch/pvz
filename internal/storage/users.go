@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"pvz/internal/storage/migrations/entity"
 
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 type UsersPostgresStorage struct {
@@ -29,7 +29,7 @@ func (u *UsersPostgresStorage) GetUserByEmail(email string) (*entity.User, error
 }
 
 func (u *UsersPostgresStorage) CreateUser(email, password, role string) (*entity.User, error) {
-	id := uuid.New()
+	id := uuid.Must(uuid.NewV4())
 	query := "INSERT INTO users (user_id, email, password_hash, role_name) VALUES ($1, $2, $3, $4)"
 	_, err := u.db.Exec(query, id, email, password, role)
 	if err != nil {
