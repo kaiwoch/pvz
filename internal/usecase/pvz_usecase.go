@@ -11,7 +11,12 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type PVZUsecase struct {
+type PVZUsecase interface {
+	CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error)
+	GetPVZsWithFilter(ctx context.Context, filter entity.Filter) (*PVZListResponse, error)
+}
+
+type PVZUsecaseImpl struct {
 	pvzStorage *storage.PVZPostgresStorage
 }
 
@@ -22,11 +27,11 @@ type PVZListResponse struct {
 	Limit int              `json:"limit"`
 }
 
-func NewPVZUsecase(pvzStorage *storage.PVZPostgresStorage, receptionStorage *storage.ReceptionPostgresStorage, productStorage *storage.ProductPostgresStorage) *PVZUsecase {
-	return &PVZUsecase{pvzStorage: pvzStorage}
+func NewPVZUsecase(pvzStorage *storage.PVZPostgresStorage) *PVZUsecaseImpl {
+	return &PVZUsecaseImpl{pvzStorage: pvzStorage}
 }
 
-func (p *PVZUsecase) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
+func (p *PVZUsecaseImpl) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
 
 	pvz, err := p.pvzStorage.GetPVZById(id)
 	if err != sql.ErrNoRows {
@@ -43,7 +48,7 @@ func (p *PVZUsecase) CreatePVZ(id, user_id uuid.UUID, city string, date time.Tim
 	return pvz, nil
 }
 
-func (p *PVZUsecase) GetPVZsWithFilter(ctx context.Context, filter entity.Filter) (*PVZListResponse, error) {
+func (p *PVZUsecaseImpl) GetPVZsWithFilter(ctx context.Context, filter entity.Filter) (*PVZListResponse, error) {
 	pvzs, err := p.pvzStorage.GetPVZsWithFilter(ctx, filter)
 	if err != nil {
 		return nil, err

@@ -154,7 +154,7 @@ func TestRegister(t *testing.T) {
 			mock: func(muu *MockUserUsecase) {
 				muu.On("Register", "kanzartem11@mail.ru", "q1w2e3", "moderator").Return("user_id", nil)
 			},
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusCreated,
 		},
 		{
 			name: "user already exists",

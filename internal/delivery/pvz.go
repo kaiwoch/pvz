@@ -12,10 +12,10 @@ import (
 )
 
 type PVZHandler struct {
-	pvzUsecase *usecase.PVZUsecase
+	pvzUsecase usecase.PVZUsecase
 }
 
-func NewPVZHandler(pvzUsecase *usecase.PVZUsecase) *PVZHandler {
+func NewPVZHandler(pvzUsecase usecase.PVZUsecase) *PVZHandler {
 	return &PVZHandler{pvzUsecase: pvzUsecase}
 }
 
@@ -24,7 +24,7 @@ func (h *PVZHandler) PostPVZ(c *gin.Context) {
 	id, _ := c.Get("userID")
 
 	if role.(string) != "moderator" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permision denied"})
 		return
 	}
 
@@ -39,6 +39,11 @@ func (h *PVZHandler) PostPVZ(c *gin.Context) {
 		return
 	}
 
+	if input.Id.IsNil() || input.City == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
 	idx, err := uuid.FromString(id.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -47,42 +52,52 @@ func (h *PVZHandler) PostPVZ(c *gin.Context) {
 
 	pvz, err := h.pvzUsecase.CreatePVZ(input.Id, idx, input.City, input.RegistrationDate)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"pvz": pvz})
+	c.JSON(http.StatusCreated, pvz)
 }
 
 func (h *PVZHandler) GetPVZs(c *gin.Context) {
+	var filter entity.Filter
 	role, _ := c.Get("role")
 
 	if role.(string) != "moderator" && role.(string) != "employee" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permision denied"})
 		return
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page"})
+		return
+	}
+	filter.Page = page
 
-	var startDate, endDate *time.Time
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit"})
+		return
+	}
+	filter.Limit = limit
+
 	if startDateStr := c.Query("startDate"); startDateStr != "" {
-		if t, err := time.Parse(time.RFC3339, startDateStr); err == nil {
-			startDate = &t
+		startDate, err := time.Parse(time.RFC3339, startDateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid startDate format"})
+			return
 		}
+		filter.StartDate = &startDate
 	}
 
 	if endDateStr := c.Query("endDate"); endDateStr != "" {
-		if t, err := time.Parse(time.RFC3339, endDateStr); err == nil {
-			endDate = &t
+		endDate, err := time.Parse(time.RFC3339, endDateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid endDate format"})
+			return
 		}
-	}
-
-	filter := entity.Filter{
-		StartDate: startDate,
-		EndDate:   endDate,
-		Page:      page,
-		Limit:     limit,
+		filter.EndDate = &endDate
 	}
 
 	// Вызов usecase

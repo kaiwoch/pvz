@@ -20,7 +20,7 @@ func (h *ReceptionHandler) Reception(c *gin.Context) {
 	role, _ := c.Get("role")
 
 	if role.(string) != "employee" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permision denied"})
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *ReceptionHandler) UpdateReceptionStatus(c *gin.Context) {
 	role, _ := c.Get("role")
 
 	if role.(string) != "employee" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permision denied"})
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *ReceptionHandler) UpdateReceptionStatus(c *gin.Context) {
 
 	reception, err := h.receptionUsecase.UpdateReceptionStatus(pvz_id)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

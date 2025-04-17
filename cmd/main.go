@@ -28,7 +28,7 @@ func main() {
 	auth := usecase.NewAuthService("secret")
 	receptionUsecase := usecase.NewReceptionUsecase(receptionRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, auth)
-	pvzUsecase := usecase.NewPVZUsecase(pvzRepo, receptionRepo, productRepo)
+	pvzUsecase := usecase.NewPVZUsecase(pvzRepo)
 	productUsecase := usecase.NewProductUsecase(productRepo, receptionRepo)
 
 	loginHandler := delivery.NewLoginHandler(userUsecase)

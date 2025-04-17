@@ -75,7 +75,7 @@ func TestReceptionHandler(t *testing.T) {
 				"pvzId": pvzID.String(),
 			},
 			mock:         func(m *MockReceptionUsecase) {},
-			expectedCode: http.StatusBadRequest,
+			expectedCode: http.StatusForbidden,
 			expectedBody: gin.H{},
 		},
 		{
@@ -156,7 +156,7 @@ func TestUpdateReceptionHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	tests := []struct {
-		param        uuid.UUID
+		param        any
 		name         string
 		role         string
 		requestBody  any
@@ -191,8 +191,28 @@ func TestUpdateReceptionHandler(t *testing.T) {
 			role:         "moderator",
 			requestBody:  nil,
 			mock:         func(m *MockReceptionUsecase) {},
+			expectedCode: http.StatusForbidden,
+			expectedBody: gin.H{},
+		},
+		{
+			name:         "wrong param",
+			param:        "param",
+			role:         "employee",
+			requestBody:  nil,
+			mock:         func(m *MockReceptionUsecase) {},
 			expectedCode: http.StatusBadRequest,
 			expectedBody: gin.H{},
+		},
+		{
+			name:        "attempt to close a closed reception",
+			param:       pvzID,
+			role:        "employee",
+			requestBody: nil,
+			mock: func(m *MockReceptionUsecase) {
+				m.On("UpdateReceptionStatus", pvzID).Return(&entity.Receptions{}, errors.New("no available receptions"))
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: gin.H{"error": "no available receptions"},
 		},
 	}
 
@@ -210,7 +230,7 @@ func TestUpdateReceptionHandler(t *testing.T) {
 			})
 
 			body, _ := json.Marshal(tt.requestBody)
-			req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/pvz/%s/close_last_reception", tt.param), bytes.NewBuffer(body))
+			req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/pvz/%v/close_last_reception", tt.param), bytes.NewBuffer(body))
 			req.Header.Set("Content-Type", "application/json")
 
 			w := httptest.NewRecorder()
@@ -222,8 +242,6 @@ func TestUpdateReceptionHandler(t *testing.T) {
 				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-
-				fmt.Println(response)
 
 				assert.Equal(t, tt.expectedBody.(gin.H)["id"], response["id"])
 				assert.Equal(t, tt.expectedBody.(gin.H)["status"], response["status"])
