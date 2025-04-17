@@ -156,6 +156,7 @@ func TestUpdateReceptionHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	tests := []struct {
+		param        uuid.UUID
 		name         string
 		role         string
 		requestBody  any
@@ -165,6 +166,7 @@ func TestUpdateReceptionHandler(t *testing.T) {
 	}{
 		{
 			name:        "successfully closed reception",
+			param:       pvzID,
 			role:        "employee",
 			requestBody: nil,
 			mock: func(m *MockReceptionUsecase) {
@@ -180,11 +182,12 @@ func TestUpdateReceptionHandler(t *testing.T) {
 				"id":       receptionID.String(),
 				"dateTime": date.Format(time.RFC3339),
 				"pvzId":    pvzID.String(),
-				"status":   "in_progress",
+				"status":   "closed",
 			},
 		},
 		{
 			name:         "wrong role",
+			param:        pvzID,
 			role:         "moderator",
 			requestBody:  nil,
 			mock:         func(m *MockReceptionUsecase) {},
@@ -207,7 +210,7 @@ func TestUpdateReceptionHandler(t *testing.T) {
 			})
 
 			body, _ := json.Marshal(tt.requestBody)
-			req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/pvz/%s/close_last_reception", pvzID), bytes.NewBuffer(body))
+			req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/pvz/%s/close_last_reception", tt.param), bytes.NewBuffer(body))
 			req.Header.Set("Content-Type", "application/json")
 
 			w := httptest.NewRecorder()
@@ -215,7 +218,7 @@ func TestUpdateReceptionHandler(t *testing.T) {
 
 			assert.Equal(t, tt.expectedCode, w.Code)
 
-			if tt.expectedCode == http.StatusCreated {
+			if tt.expectedCode == http.StatusOK {
 				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
