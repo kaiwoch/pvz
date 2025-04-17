@@ -31,3 +31,24 @@ func (r *ReceptionUsecase) CreateReception(id uuid.UUID) (*entity.Receptions, er
 	}
 	return reception, nil
 }
+
+func (r *ReceptionUsecase) UpdateReceptionStatus(pvz_id uuid.UUID) (*entity.Receptions, error) {
+	reception_id, status, err := r.receptionStorage.GetLastReceptionStatus(pvz_id)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, fmt.Errorf("failed to check reception status: %w", err)
+	}
+	if status == "close" {
+		return nil, fmt.Errorf("no available receptions")
+	}
+	err = r.receptionStorage.UpdateReceptionStatus(reception_id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update reception status: %w", err)
+	}
+
+	reception, err := r.receptionStorage.GetReceptionById(reception_id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get reception: %w", err)
+	}
+
+	return reception, nil
+}

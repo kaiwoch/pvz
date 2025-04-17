@@ -47,3 +47,29 @@ func (h *ReceptionHandler) Reception(c *gin.Context) {
 
 	c.JSON(http.StatusOK, reception)
 }
+
+func (h *ReceptionHandler) UpdateReceptionStatus(c *gin.Context) {
+	role, _ := c.Get("role")
+	//id, _ := c.Get("userID")
+
+	if role.(string) != "employee" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
+		return
+	}
+
+	pvz_id_string := c.Param("pvzId")
+
+	pvz_id, err := uuid.FromString(pvz_id_string)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Wrong query"})
+		return
+	}
+
+	reception, err := h.receptionUsecase.UpdateReceptionStatus(pvz_id)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, reception)
+}

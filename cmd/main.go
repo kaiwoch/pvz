@@ -51,6 +51,7 @@ func main() {
 		protected.POST("/receptions", receptionHandler.Reception)
 		protected.POST("/products", productHandler.Reception)
 		protected.POST("/pvz/:pvzId/delete_last_product", productHandler.DeleteLastProduct)
+		protected.POST("/pvz/:pvzId/close_last_reception", receptionHandler.UpdateReceptionStatus)
 	}
 
 	srv := &http.Server{
