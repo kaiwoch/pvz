@@ -16,22 +16,6 @@ func NewReceptionPostgresStorage(db *sql.DB) *ReceptionPostgresStorage {
 	return &ReceptionPostgresStorage{db: db}
 }
 
-/* func (r *ReceptionPostgresStorage) GetListReceptionsByPVZId(id uuid.UUID) ([]entity.Receptions, error) {
-	query := "SELECT * FROM reception WHERE pvz_id = $1"
-	rows, err := r.db.Query(query, id)
-
-	var receptionList []entity.Receptions
-	for rows.Next() {
-		var reception entity.Receptions
-		err = rows.Scan(&reception.ID, &reception.DateTime, &reception.PVZID, &reception.Status)
-		if err != nil {
-			return nil, err
-		}
-		receptionList = append(receptionList, reception)
-	}
-	return receptionList, nil
-} */
-
 func (r *ReceptionPostgresStorage) CreateReception(id uuid.UUID) (*entity.Receptions, error) {
 	reception_id := uuid.Must(uuid.NewV4())
 	date := time.Now()

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"pvz/internal/storage"
@@ -11,13 +12,18 @@ import (
 )
 
 type PVZUsecase struct {
-	pvzStorage       *storage.PVZPostgresStorage
-	receptionStorage *storage.ReceptionPostgresStorage //
-	productStorage   *storage.ProductPostgresStorage   //
+	pvzStorage *storage.PVZPostgresStorage
+}
+
+type PVZListResponse struct {
+	PVZs  []entity.ListPVZ `json:"pvzs"`
+	Total int              `json:"total"`
+	Page  int              `json:"page"`
+	Limit int              `json:"limit"`
 }
 
 func NewPVZUsecase(pvzStorage *storage.PVZPostgresStorage, receptionStorage *storage.ReceptionPostgresStorage, productStorage *storage.ProductPostgresStorage) *PVZUsecase {
-	return &PVZUsecase{pvzStorage: pvzStorage, receptionStorage: receptionStorage, productStorage: productStorage}
+	return &PVZUsecase{pvzStorage: pvzStorage}
 }
 
 func (p *PVZUsecase) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
@@ -37,29 +43,21 @@ func (p *PVZUsecase) CreatePVZ(id, user_id uuid.UUID, city string, date time.Tim
 	return pvz, nil
 }
 
-// TODO: плохо реализовал, нужно переделать
-/* func (p *PVZUsecase) GetListPVZ(user_id uuid.UUID) ([]entity.ListPVZ, error) {
-	var output []entity.ListPVZ
-
-	listPVZ, err := p.pvzStorage.GetListPVZByUserId(user_id)
+func (p *PVZUsecase) GetPVZsWithFilter(ctx context.Context, filter entity.Filter) (*PVZListResponse, error) {
+	pvzs, err := p.pvzStorage.GetPVZsWithFilter(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	for _, PVZ := range listPVZ {
-		listReception, err := p.receptionStorage.GetListReceptionsByPVZId(PVZ.ID)
-		if err != nil {
-			return nil, err
-		}
-		for _, reception := range listReception {
-			listProduct, err := p.productStorage.GetListProductsByReceptionId(reception.ID)
-			if err != nil {
-				return nil, err
-			}
-			reception.Products = append(reception.Products, listProduct...)
-		}
-		output = append(output, entity.ListPVZ{Pvz: PVZ, Receptions: listReception})
-	}
-	return output, nil
-} */
 
-//time.Now().UTC().Format(time.RFC3339)
+	total, err := p.pvzStorage.CountPVZsWithFilter(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return &PVZListResponse{
+		PVZs:  pvzs,
+		Total: total,
+		Page:  filter.Page,
+		Limit: filter.Limit,
+	}, nil
+}

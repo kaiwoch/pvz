@@ -50,7 +50,6 @@ func (h *ReceptionHandler) Reception(c *gin.Context) {
 
 func (h *ReceptionHandler) UpdateReceptionStatus(c *gin.Context) {
 	role, _ := c.Get("role")
-	//id, _ := c.Get("userID")
 
 	if role.(string) != "employee" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})

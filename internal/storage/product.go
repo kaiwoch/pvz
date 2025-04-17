@@ -16,22 +16,6 @@ func NewProductPostgresStorage(db *sql.DB) *ProductPostgresStorage {
 	return &ProductPostgresStorage{db: db}
 }
 
-/* func (p *ProductPostgresStorage) GetListProductsByReceptionId(id uuid.UUID) ([]entity.Products, error) {
-	query := "SELECT * FROM product WHERE reception_id = $1"
-	rows, err := p.db.Query(query, id)
-
-	var productList []entity.Products
-	for rows.Next() {
-		var product entity.Products
-		err = rows.Scan(&product.ID, &product.DateTime, &product.Type, &product.ReceptionId)
-		if err != nil {
-			return nil, err
-		}
-		productList = append(productList, product)
-	}
-	return productList, nil
-} */
-
 func (p *ProductPostgresStorage) CreateProduct(id uuid.UUID, product_type string) (*entity.Products, error) {
 	product_id := uuid.Must(uuid.NewV4())
 	date := time.Now()

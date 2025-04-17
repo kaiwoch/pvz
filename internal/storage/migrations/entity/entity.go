@@ -39,3 +39,10 @@ type ListPVZ struct {
 	Pvz        PVZ          `json:"pvz"`
 	Receptions []Receptions `json:"receptions"`
 }
+
+type Filter struct {
+	StartDate *time.Time
+	EndDate   *time.Time
+	Page      int
+	Limit     int
+}

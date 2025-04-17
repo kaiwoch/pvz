@@ -34,7 +34,7 @@ func main() {
 	loginHandler := delivery.NewLoginHandler(userUsecase)
 	registerHandler := delivery.NewRegisterHandler(userUsecase)
 	dummyLoginHandler := delivery.NewDummyLoginHandler(userUsecase)
-	postPVZHandler := delivery.NewPVZHandler(pvzUsecase)
+	PVZHandler := delivery.NewPVZHandler(pvzUsecase)
 	receptionHandler := delivery.NewReceptionHandler(receptionUsecase)
 	productHandler := delivery.NewProductHandler(productUsecase)
 
@@ -47,11 +47,12 @@ func main() {
 	protected := r.Group("")
 	protected.Use(middlewares.JWTAuthMiddleware(auth))
 	{
-		protected.POST("/pvz", postPVZHandler.PostPVZ)
+		protected.POST("/pvz", PVZHandler.PostPVZ)
 		protected.POST("/receptions", receptionHandler.Reception)
 		protected.POST("/products", productHandler.Reception)
 		protected.POST("/pvz/:pvzId/delete_last_product", productHandler.DeleteLastProduct)
 		protected.POST("/pvz/:pvzId/close_last_reception", receptionHandler.UpdateReceptionStatus)
+		protected.GET("/pvz", PVZHandler.GetPVZs)
 	}
 
 	srv := &http.Server{
