@@ -9,16 +9,15 @@ import (
 )
 
 type ReceptionHandler struct {
-	receptionUsecase *usecase.ReceptionUsecase
+	receptionUsecase usecase.ReceptionUsecase
 }
 
-func NewReceptionHandler(receptionUsecase *usecase.ReceptionUsecase) *ReceptionHandler {
+func NewReceptionHandler(receptionUsecase usecase.ReceptionUsecase) *ReceptionHandler {
 	return &ReceptionHandler{receptionUsecase: receptionUsecase}
 }
 
 func (h *ReceptionHandler) Reception(c *gin.Context) {
 	role, _ := c.Get("role")
-	//id, _ := c.Get("userID")
 
 	if role.(string) != "employee" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Permision denied"})
@@ -34,18 +33,18 @@ func (h *ReceptionHandler) Reception(c *gin.Context) {
 		return
 	}
 
-	if input.ID.String() == "" {
+	if input.ID.IsNil() {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
 	reception, err := h.receptionUsecase.CreateReception(input.ID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, reception)
+	c.JSON(http.StatusCreated, reception)
 }
 
 func (h *ReceptionHandler) UpdateReceptionStatus(c *gin.Context) {

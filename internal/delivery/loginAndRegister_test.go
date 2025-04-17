@@ -32,7 +32,7 @@ func TestDummyLoginHandler_DummyLogin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tests := []struct {
 		name         string
-		requestBody  map[string]string
+		requestBody  any
 		mock         func(*MockUserUsecase)
 		expectedCode int
 	}{
@@ -71,7 +71,7 @@ func TestDummyLoginHandler_DummyLogin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name: "login error",
+			name: "moderator login error",
 			requestBody: map[string]string{
 				"role": "moderator",
 			},
@@ -80,6 +80,29 @@ func TestDummyLoginHandler_DummyLogin(t *testing.T) {
 					Return("", errors.New("login failed"))
 			},
 			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name: "employee login error",
+			requestBody: map[string]string{
+				"role": "employee",
+			},
+			mock: func(m *MockUserUsecase) {
+				m.On("Login", "dummy_employee@test.com", "supersecretpassword").
+					Return("", errors.New("login failed"))
+			},
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name:         "missing body",
+			requestBody:  nil,
+			mock:         func(m *MockUserUsecase) {},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "invalid json",
+			requestBody:  "json",
+			mock:         func(m *MockUserUsecase) {},
+			expectedCode: http.StatusBadRequest,
 		},
 	}
 
@@ -117,7 +140,7 @@ func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tests := []struct {
 		name         string
-		requestBody  map[string]string
+		requestBody  any
 		mock         func(*MockUserUsecase)
 		expectedCode int
 	}{
@@ -146,11 +169,9 @@ func TestRegister(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:        "missing body",
-			requestBody: map[string]string{},
-			mock: func(muu *MockUserUsecase) {
-				muu.On("Register", "", "", "").Return("", errors.New("missing body"))
-			},
+			name:         "missing body",
+			requestBody:  nil,
+			mock:         func(muu *MockUserUsecase) {},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
@@ -160,9 +181,7 @@ func TestRegister(t *testing.T) {
 				"password": "q1w2e3",
 				"role":     "moderator",
 			},
-			mock: func(muu *MockUserUsecase) {
-				muu.On("Register", "", "q1w2e3", "moderator").Return("", errors.New("empty email"))
-			},
+			mock:         func(muu *MockUserUsecase) {},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
@@ -172,9 +191,7 @@ func TestRegister(t *testing.T) {
 				"password": "",
 				"role":     "moderator",
 			},
-			mock: func(muu *MockUserUsecase) {
-				muu.On("Register", "kanzartem11@mail.ru", "", "moderator").Return("", errors.New("empty password"))
-			},
+			mock:         func(muu *MockUserUsecase) {},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
@@ -184,9 +201,7 @@ func TestRegister(t *testing.T) {
 				"password": "q1w2e3",
 				"role":     "",
 			},
-			mock: func(muu *MockUserUsecase) {
-				muu.On("Register", "kanzartem11@mail.ru", "q1w2e3", "").Return("", errors.New("empty role"))
-			},
+			mock:         func(muu *MockUserUsecase) {},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
@@ -199,6 +214,12 @@ func TestRegister(t *testing.T) {
 			mock: func(muu *MockUserUsecase) {
 				muu.On("Register", "kanzartem11@mail.ru", "q1w2e3", "user").Return("", errors.New("invalid role"))
 			},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "invalid json",
+			requestBody:  "json",
+			mock:         func(muu *MockUserUsecase) {},
 			expectedCode: http.StatusBadRequest,
 		},
 	}
@@ -237,7 +258,7 @@ func TestLogin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tests := []struct {
 		name         string
-		requestBody  map[string]string
+		requestBody  any
 		mock         func(*MockUserUsecase)
 		expectedCode int
 	}{
@@ -276,7 +297,13 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name:         "missing body",
-			requestBody:  map[string]string{},
+			requestBody:  nil,
+			mock:         func(muu *MockUserUsecase) {},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "invalid_json",
+			requestBody:  "json",
 			mock:         func(muu *MockUserUsecase) {},
 			expectedCode: http.StatusBadRequest,
 		},

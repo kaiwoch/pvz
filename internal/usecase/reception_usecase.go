@@ -9,15 +9,20 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type ReceptionUsecase struct {
+type ReceptionUsecase interface {
+	CreateReception(uuid.UUID) (*entity.Receptions, error)
+	UpdateReceptionStatus(uuid.UUID) (*entity.Receptions, error)
+}
+
+type ReceptionUsecaseImpl struct {
 	receptionStorage *storage.ReceptionPostgresStorage
 }
 
-func NewReceptionUsecase(receptionStorage *storage.ReceptionPostgresStorage) *ReceptionUsecase {
-	return &ReceptionUsecase{receptionStorage: receptionStorage}
+func NewReceptionUsecase(receptionStorage *storage.ReceptionPostgresStorage) *ReceptionUsecaseImpl {
+	return &ReceptionUsecaseImpl{receptionStorage: receptionStorage}
 }
 
-func (r *ReceptionUsecase) CreateReception(id uuid.UUID) (*entity.Receptions, error) {
+func (r *ReceptionUsecaseImpl) CreateReception(id uuid.UUID) (*entity.Receptions, error) {
 	_, status, err := r.receptionStorage.GetLastReceptionStatus(id)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("failed to check reception status: %w", err)
@@ -32,7 +37,7 @@ func (r *ReceptionUsecase) CreateReception(id uuid.UUID) (*entity.Receptions, er
 	return reception, nil
 }
 
-func (r *ReceptionUsecase) UpdateReceptionStatus(pvz_id uuid.UUID) (*entity.Receptions, error) {
+func (r *ReceptionUsecaseImpl) UpdateReceptionStatus(pvz_id uuid.UUID) (*entity.Receptions, error) {
 	reception_id, status, err := r.receptionStorage.GetLastReceptionStatus(pvz_id)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("failed to check reception status: %w", err)

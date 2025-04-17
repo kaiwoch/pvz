@@ -27,6 +27,11 @@ func (h *RegisterHandler) Register(c *gin.Context) {
 		return
 	}
 
+	if input.Email == "" || input.Password == "" || input.Role == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
 	id, err := h.registerUsecase.Register(input.Email, input.Password, input.Role)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
