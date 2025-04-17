@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"net/http"
-	"pvz/internal/storage/usecase"
+	"pvz/internal/usecase"
 	"strings"
 
 	"github.com/gin-gonic/gin"

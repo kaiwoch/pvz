@@ -7,7 +7,7 @@ import (
 	"pvz/internal/delivery"
 	"pvz/internal/delivery/middlewares"
 	"pvz/internal/storage"
-	"pvz/internal/storage/usecase"
+	"pvz/internal/usecase"
 	"time"
 
 	"github.com/gin-gonic/gin"

@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"net/http"
-	"pvz/internal/storage/usecase"
+	"pvz/internal/usecase"
 	"time"
 
 	"github.com/gin-gonic/gin"
