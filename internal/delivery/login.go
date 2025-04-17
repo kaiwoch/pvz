@@ -8,10 +8,10 @@ import (
 )
 
 type LoginHandler struct {
-	loginUsecase *usecase.UserUsecase
+	loginUsecase usecase.UserUsecase
 }
 
-func NewLoginHandler(loginUsecase *usecase.UserUsecase) *LoginHandler {
+func NewLoginHandler(loginUsecase usecase.UserUsecase) *LoginHandler {
 	return &LoginHandler{loginUsecase: loginUsecase}
 }
 

@@ -8,10 +8,10 @@ import (
 )
 
 type RegisterHandler struct {
-	registerUsecase *usecase.UserUsecase
+	registerUsecase usecase.UserUsecase
 }
 
-func NewRegisterHandler(registerUsecase *usecase.UserUsecase) *RegisterHandler {
+func NewRegisterHandler(registerUsecase usecase.UserUsecase) *RegisterHandler {
 	return &RegisterHandler{registerUsecase: registerUsecase}
 }
 
@@ -29,7 +29,7 @@ func (h *RegisterHandler) Register(c *gin.Context) {
 
 	id, err := h.registerUsecase.Register(input.Email, input.Password, input.Role)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

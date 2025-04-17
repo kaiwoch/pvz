@@ -8,10 +8,10 @@ import (
 )
 
 type DummyLoginHandler struct {
-	dummyLoginUsecase *usecase.UserUsecase
+	dummyLoginUsecase usecase.UserUsecase
 }
 
-func NewDummyLoginHandler(loginUsecase *usecase.UserUsecase) *DummyLoginHandler {
+func NewDummyLoginHandler(loginUsecase usecase.UserUsecase) *DummyLoginHandler {
 	return &DummyLoginHandler{dummyLoginUsecase: loginUsecase}
 }
 
