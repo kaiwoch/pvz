@@ -9,16 +9,21 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type ProductUsecase struct {
-	productStorage   *storage.ProductPostgresStorage
+type ProductUsecase interface {
+	CreateProduct(id uuid.UUID, product_type string) (*entity.Products, error)
+	DeleteLastProduct(pvz_id uuid.UUID) error
+}
+
+type ProductUsecaseImpl struct {
+	productStorage   storage.ProductPostgresStorage
 	receptionStorage storage.ReceptionPostgresStorage
 }
 
-func NewProductUsecase(productStorage *storage.ProductPostgresStorage, receptionStorage storage.ReceptionPostgresStorage) *ProductUsecase {
-	return &ProductUsecase{productStorage: productStorage, receptionStorage: receptionStorage}
+func NewProductUsecase(productStorage storage.ProductPostgresStorage, receptionStorage storage.ReceptionPostgresStorage) *ProductUsecaseImpl {
+	return &ProductUsecaseImpl{productStorage: productStorage, receptionStorage: receptionStorage}
 }
 
-func (p *ProductUsecase) CreateProduct(id uuid.UUID, product_type string) (*entity.Products, error) {
+func (p *ProductUsecaseImpl) CreateProduct(id uuid.UUID, product_type string) (*entity.Products, error) {
 	reception_id, status, err := p.receptionStorage.GetLastReceptionStatus(id)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("failed to check reception status: %w", err)
@@ -34,7 +39,7 @@ func (p *ProductUsecase) CreateProduct(id uuid.UUID, product_type string) (*enti
 	return products, nil
 }
 
-func (p *ProductUsecase) DeleteLastProduct(pvz_id uuid.UUID) error {
+func (p *ProductUsecaseImpl) DeleteLastProduct(pvz_id uuid.UUID) error {
 	reception_id, status, err := p.receptionStorage.GetLastReceptionStatus(pvz_id)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("failed to check reception status: %w", err)

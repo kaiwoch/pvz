@@ -17,7 +17,7 @@ type PVZUsecase interface {
 }
 
 type PVZUsecaseImpl struct {
-	pvzStorage *storage.PVZPostgresStorage
+	pvzStorage storage.PVZPostgresStorage
 }
 
 type PVZListResponse struct {
@@ -27,7 +27,7 @@ type PVZListResponse struct {
 	Limit int              `json:"limit"`
 }
 
-func NewPVZUsecase(pvzStorage *storage.PVZPostgresStorage) *PVZUsecaseImpl {
+func NewPVZUsecase(pvzStorage storage.PVZPostgresStorage) *PVZUsecaseImpl {
 	return &PVZUsecaseImpl{pvzStorage: pvzStorage}
 }
 

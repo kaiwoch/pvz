@@ -10,15 +10,22 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type PVZPostgresStorage struct {
+type PVZPostgresStorage interface {
+	CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error)
+	GetPVZById(id uuid.UUID) (*entity.PVZ, error)
+	GetPVZsWithFilter(ctx context.Context, filter entity.Filter) ([]entity.ListPVZ, error)
+	CountPVZsWithFilter(ctx context.Context, filter entity.Filter) (int, error)
+}
+
+type PVZPostgresStorageImpl struct {
 	db *sql.DB
 }
 
-func NewPVZPostgresStorage(db *sql.DB) *PVZPostgresStorage {
-	return &PVZPostgresStorage{db: db}
+func NewPVZPostgresStorage(db *sql.DB) *PVZPostgresStorageImpl {
+	return &PVZPostgresStorageImpl{db: db}
 }
 
-func (p *PVZPostgresStorage) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
+func (p *PVZPostgresStorageImpl) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
 	query := "INSERT INTO pvz (pvz_id, registration_date, city_name, user_id) VALUES ($1, $2, $3, $4)"
 	_, err := p.db.Exec(query, id, date, city, user_id)
 	if err != nil {
@@ -27,7 +34,7 @@ func (p *PVZPostgresStorage) CreatePVZ(id, user_id uuid.UUID, city string, date 
 	return &entity.PVZ{ID: id, RegistrationDate: date, City: city}, nil // проверить дату
 }
 
-func (p *PVZPostgresStorage) GetPVZById(id uuid.UUID) (*entity.PVZ, error) {
+func (p *PVZPostgresStorageImpl) GetPVZById(id uuid.UUID) (*entity.PVZ, error) {
 	var pvz entity.PVZ
 	query := "SELECT * FROM pvz WHERE pvz_id = $1"
 	err := p.db.QueryRow(query, id).Scan(&pvz.ID, &pvz.RegistrationDate, &pvz.City, &pvz.UserID)
@@ -40,7 +47,7 @@ func (p *PVZPostgresStorage) GetPVZById(id uuid.UUID) (*entity.PVZ, error) {
 	return &pvz, nil
 }
 
-func (r *PVZPostgresStorage) GetPVZsWithFilter(ctx context.Context, filter entity.Filter) ([]entity.ListPVZ, error) {
+func (r *PVZPostgresStorageImpl) GetPVZsWithFilter(ctx context.Context, filter entity.Filter) ([]entity.ListPVZ, error) {
 	query := `
 		WITH filtered_receptions AS (
 			SELECT r.reception_id, r.date_time, r.pvz_id, r.status_name
@@ -139,7 +146,7 @@ func (r *PVZPostgresStorage) GetPVZsWithFilter(ctx context.Context, filter entit
 	return result, nil
 }
 
-func (r *PVZPostgresStorage) CountPVZsWithFilter(ctx context.Context, filter entity.Filter) (int, error) {
+func (r *PVZPostgresStorageImpl) CountPVZsWithFilter(ctx context.Context, filter entity.Filter) (int, error) {
 	query := `
 		SELECT COUNT(DISTINCT p.pvz_id)
 		FROM pvz p

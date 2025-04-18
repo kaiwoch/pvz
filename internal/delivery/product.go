@@ -9,10 +9,10 @@ import (
 )
 
 type ProductHandler struct {
-	productUsecase *usecase.ProductUsecase
+	productUsecase usecase.ProductUsecase
 }
 
-func NewProductHandler(productUsecase *usecase.ProductUsecase) *ProductHandler {
+func NewProductHandler(productUsecase usecase.ProductUsecase) *ProductHandler {
 	return &ProductHandler{productUsecase: productUsecase}
 }
 
