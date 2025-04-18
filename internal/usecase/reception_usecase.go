@@ -15,10 +15,10 @@ type ReceptionUsecase interface {
 }
 
 type ReceptionUsecaseImpl struct {
-	receptionStorage *storage.ReceptionPostgresStorage
+	receptionStorage storage.ReceptionPostgresStorage
 }
 
-func NewReceptionUsecase(receptionStorage *storage.ReceptionPostgresStorage) *ReceptionUsecaseImpl {
+func NewReceptionUsecase(receptionStorage storage.ReceptionPostgresStorage) *ReceptionUsecaseImpl {
 	return &ReceptionUsecaseImpl{receptionStorage: receptionStorage}
 }
 

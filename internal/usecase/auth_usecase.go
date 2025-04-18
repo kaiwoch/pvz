@@ -10,6 +10,7 @@ import (
 
 type AuthUsecase interface {
 	ValidateToken(tokenString string) (*jwt.Token, error)
+	GenerateToken(userID uuid.UUID, role string) (string, error)
 }
 
 type AuthService struct {

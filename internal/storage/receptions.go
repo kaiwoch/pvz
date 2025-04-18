@@ -8,15 +8,22 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type ReceptionPostgresStorage struct {
+type ReceptionPostgresStorage interface {
+	CreateReception(id uuid.UUID) (*entity.Receptions, error)
+	GetLastReceptionStatus(id uuid.UUID) (uuid.UUID, string, error)
+	UpdateReceptionStatus(reception_id uuid.UUID) error
+	GetReceptionById(reception_id uuid.UUID) (*entity.Receptions, error)
+}
+
+type ReceptionPostgresStorageImpl struct {
 	db *sql.DB
 }
 
-func NewReceptionPostgresStorage(db *sql.DB) *ReceptionPostgresStorage {
-	return &ReceptionPostgresStorage{db: db}
+func NewReceptionPostgresStorage(db *sql.DB) *ReceptionPostgresStorageImpl {
+	return &ReceptionPostgresStorageImpl{db: db}
 }
 
-func (r *ReceptionPostgresStorage) CreateReception(id uuid.UUID) (*entity.Receptions, error) {
+func (r *ReceptionPostgresStorageImpl) CreateReception(id uuid.UUID) (*entity.Receptions, error) {
 	reception_id := uuid.Must(uuid.NewV4())
 	date := time.Now()
 	status := "in_progress"
@@ -30,7 +37,7 @@ func (r *ReceptionPostgresStorage) CreateReception(id uuid.UUID) (*entity.Recept
 	return &entity.Receptions{ID: reception_id, DateTime: date, PVZID: id, Status: status}, nil
 }
 
-func (r *ReceptionPostgresStorage) GetLastReceptionStatus(id uuid.UUID) (uuid.UUID, string, error) {
+func (r *ReceptionPostgresStorageImpl) GetLastReceptionStatus(id uuid.UUID) (uuid.UUID, string, error) {
 	var status string
 	var reception_id uuid.UUID
 	query := "SELECT reception_id, status_name FROM reception WHERE pvz_id = $1 ORDER BY date_time DESC LIMIT 1"
@@ -43,7 +50,7 @@ func (r *ReceptionPostgresStorage) GetLastReceptionStatus(id uuid.UUID) (uuid.UU
 	return reception_id, status, err
 }
 
-func (r *ReceptionPostgresStorage) UpdateReceptionStatus(reception_id uuid.UUID) error {
+func (r *ReceptionPostgresStorageImpl) UpdateReceptionStatus(reception_id uuid.UUID) error {
 	query := "UPDATE reception SET status_name = 'close' WHERE reception_id = $1"
 
 	_, err := r.db.Exec(query, reception_id)
@@ -54,7 +61,7 @@ func (r *ReceptionPostgresStorage) UpdateReceptionStatus(reception_id uuid.UUID)
 	return nil
 }
 
-func (r *ReceptionPostgresStorage) GetReceptionById(reception_id uuid.UUID) (*entity.Receptions, error) {
+func (r *ReceptionPostgresStorageImpl) GetReceptionById(reception_id uuid.UUID) (*entity.Receptions, error) {
 	query := "SELECT * FROM reception WHERE reception_id = $1"
 	var date time.Time
 	var pvz_id uuid.UUID

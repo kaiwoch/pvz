@@ -11,10 +11,10 @@ import (
 
 type ProductUsecase struct {
 	productStorage   *storage.ProductPostgresStorage
-	receptionStorage *storage.ReceptionPostgresStorage
+	receptionStorage storage.ReceptionPostgresStorage
 }
 
-func NewProductUsecase(productStorage *storage.ProductPostgresStorage, receptionStorage *storage.ReceptionPostgresStorage) *ProductUsecase {
+func NewProductUsecase(productStorage *storage.ProductPostgresStorage, receptionStorage storage.ReceptionPostgresStorage) *ProductUsecase {
 	return &ProductUsecase{productStorage: productStorage, receptionStorage: receptionStorage}
 }
 

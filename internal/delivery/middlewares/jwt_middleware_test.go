@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid/v5"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,6 +15,11 @@ import (
 
 type AuthServiceMock struct {
 	mock.Mock
+}
+
+func (m *AuthServiceMock) GenerateToken(userID uuid.UUID, role string) (string, error) {
+	args := m.Called(userID, role)
+	return args.String(0), args.Error(1)
 }
 
 func (m *AuthServiceMock) ValidateToken(tokenString string) (*jwt.Token, error) {

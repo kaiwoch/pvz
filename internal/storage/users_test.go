@@ -1,7 +1,7 @@
 package storage_test
 
 import (
-	"database/sql"
+	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -53,9 +53,9 @@ func TestUsersStorage_GetUserByEmail(t *testing.T) {
 			mock: func() {
 				mock.ExpectQuery("SELECT \\* FROM users WHERE email = \\$1").
 					WithArgs("test@example.com").
-					WillReturnError(sql.ErrNoRows)
+					WillReturnError(fmt.Errorf("user not exists"))
 			},
-			expectedErr: sql.ErrNoRows,
+			expectedErr: fmt.Errorf("user not exists"),
 		},
 	}
 
@@ -63,7 +63,7 @@ func TestUsersStorage_GetUserByEmail(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
-			user, err := storage.GetUserByEmail(tt.email)
+			user, _, err := storage.GetUserByEmail(tt.email)
 
 			assert.Equal(t, tt.expectedErr, err)
 			assert.Equal(t, tt.expected, user)

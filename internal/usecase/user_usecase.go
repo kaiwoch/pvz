@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"pvz/internal/storage"
 
@@ -14,16 +15,16 @@ type UserUsecase interface {
 }
 
 type UserUsecaseImpl struct {
-	userStorage *storage.UsersPostgresStorage
-	authService *AuthService
+	userStorage storage.UsersPostgresStorage
+	authService AuthUsecase
 }
 
-func NewUserUsecase(userStorage *storage.UsersPostgresStorage, authService *AuthService) *UserUsecaseImpl {
+func NewUserUsecase(userStorage storage.UsersPostgresStorage, authService AuthUsecase) *UserUsecaseImpl {
 	return &UserUsecaseImpl{userStorage: userStorage, authService: authService}
 }
 
 func (u *UserUsecaseImpl) Login(email, password string) (string, error) {
-	user, err := u.userStorage.GetUserByEmail(email)
+	user, _, err := u.userStorage.GetUserByEmail(email)
 	if err == sql.ErrNoRows {
 		return "", fmt.Errorf("invalid credentials")
 	}
@@ -37,12 +38,13 @@ func (u *UserUsecaseImpl) Login(email, password string) (string, error) {
 }
 
 func (u *UserUsecaseImpl) Register(email, password, role string) (string, error) {
-	user, err := u.userStorage.GetUserByEmail(email)
-	if err != sql.ErrNoRows {
-		return "", fmt.Errorf("user exists")
-	}
+	user, ok, err := u.userStorage.GetUserByEmail(email)
 	if err != nil && err != sql.ErrNoRows {
-		return "", fmt.Errorf("failed to check user existence: %w", err)
+		return "", fmt.Errorf("error: %w", err)
+	}
+
+	if ok {
+		return "", errors.New("user exist")
 	}
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
