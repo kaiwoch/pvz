@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"database/sql"
 	"pvz/internal/storage"
 	"pvz/internal/storage/migrations/entity"
 	"testing"
@@ -94,6 +95,17 @@ func TestReceptionPostgresStorage_GetLastReceptionStatus(t *testing.T) {
 			expectedID:     reception_id,
 			expectedStatus: status,
 			expectedErr:    nil,
+		},
+		{
+			name:  "not found",
+			input: pvz_id,
+			mock: func() {
+				mock.ExpectQuery("SELECT reception_id, status_name FROM reception WHERE pvz_id = \\$1 ORDER BY date_time DESC LIMIT 1").
+					WithArgs(pvz_id).WillReturnError(sql.ErrNoRows)
+			},
+			expectedID:     uuid.UUID{},
+			expectedStatus: "",
+			expectedErr:    sql.ErrNoRows,
 		},
 	}
 

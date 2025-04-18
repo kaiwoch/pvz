@@ -43,7 +43,10 @@ func (r *ReceptionPostgresStorageImpl) GetLastReceptionStatus(id uuid.UUID) (uui
 	query := "SELECT reception_id, status_name FROM reception WHERE pvz_id = $1 ORDER BY date_time DESC LIMIT 1"
 
 	err := r.db.QueryRow(query, id).Scan(&reception_id, &status)
-	if err != nil {
+	if err != nil || err == sql.ErrNoRows {
+		if err == sql.ErrNoRows {
+			return uuid.UUID{}, "", sql.ErrNoRows
+		}
 		return uuid.UUID{}, "", err
 	}
 
