@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"errors"
 	"pvz/internal/storage/migrations/entity"
 
 	"github.com/gofrs/uuid/v5"
@@ -28,7 +27,7 @@ func (u *UsersPostgresStorageImpl) GetUserByEmail(email string) (*entity.User, b
 	if err != nil && err != sql.ErrNoRows {
 		return nil, false, err
 	} else if err == sql.ErrNoRows {
-		return nil, false, errors.New("user not exists")
+		return nil, false, sql.ErrNoRows
 	}
 
 	return &user, true, nil
