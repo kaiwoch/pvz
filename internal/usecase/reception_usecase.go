@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"database/sql"
 	"fmt"
 	"pvz/internal/storage"
 	"pvz/internal/storage/migrations/entity"
@@ -24,7 +23,7 @@ func NewReceptionUsecase(receptionStorage storage.ReceptionPostgresStorage) *Rec
 
 func (r *ReceptionUsecaseImpl) CreateReception(id uuid.UUID) (*entity.Receptions, error) {
 	_, status, err := r.receptionStorage.GetLastReceptionStatus(id)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil {
 		return nil, fmt.Errorf("failed to check reception status: %w", err)
 	}
 	if status == "in_progress" {
@@ -39,7 +38,7 @@ func (r *ReceptionUsecaseImpl) CreateReception(id uuid.UUID) (*entity.Receptions
 
 func (r *ReceptionUsecaseImpl) UpdateReceptionStatus(pvz_id uuid.UUID) (*entity.Receptions, error) {
 	reception_id, status, err := r.receptionStorage.GetLastReceptionStatus(pvz_id)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil {
 		return nil, fmt.Errorf("failed to check reception status: %w", err)
 	}
 	if status == "close" {
