@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"pvz/internal/storage"
 	"pvz/internal/storage/migrations/entity"
@@ -34,11 +35,12 @@ func NewPVZUsecase(pvzStorage storage.PVZPostgresStorage) *PVZUsecaseImpl {
 func (p *PVZUsecaseImpl) CreatePVZ(id, user_id uuid.UUID, city string, date time.Time) (*entity.PVZ, error) {
 
 	pvz, err := p.pvzStorage.GetPVZById(id)
-	if err != sql.ErrNoRows {
-		return nil, fmt.Errorf("pvz exists")
-	}
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("failed to check PVZ existence: %w", err)
+	}
+
+	if !pvz.ID.IsNil() {
+		return nil, errors.New("pvz exists")
 	}
 
 	pvz, err = p.pvzStorage.CreatePVZ(id, user_id, city, date)
